@@ -1,11 +1,12 @@
 
+import { Logger } from '@viva-eng/logger';
 import { request as httpRequest, IncomingMessage, RequestOptions } from 'http';
 import { request as httpsRequest } from 'https';
-import { Logger } from '@viva-eng/logger';
+import { HttpTimer } from './timer';
 import { configureDnsCache, DnsCacheParams } from './dns-cache';
 import { TimeoutAbort, NetworkError, IsRetryableCallback, retryNetworkErrors } from './retryable';
-import { HttpTimer } from './timer';
 
+export { DnsCacheParams } from './dns-cache';
 export { TimeoutAbort, NetworkError, IsRetryableCallback, retryNetworkErrors } from './retryable';
 
 let nextRequestId: number = 1;
