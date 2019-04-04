@@ -19,6 +19,7 @@ export interface HttpClientParams {
 	timeout?: number;
 	retries?: number;
 	isRetryable?: IsRetryableCallback;
+	slowThreshold?: number;
 	options?: any;
 }
 
@@ -32,6 +33,7 @@ export interface HttpRequestOptions {
 	/** Internal property, used for managing retry attempts */
 	attempt?: number;
 	isRetryable?: IsRetryableCallback;
+	slowThreshold?: number;
 	options?: any;
 }
 
@@ -47,6 +49,7 @@ export class HttpClient {
 	public readonly timeout: number;
 	public readonly retries: number;
 	public readonly isRetryable: IsRetryableCallback;
+	public readonly slowThreshold: number;
 	public readonly options?: any;
 
 	static configureDnsCache(params: DnsCacheParams) : void {
@@ -61,6 +64,7 @@ export class HttpClient {
 		this.timeout = params.timeout || 0;
 		this.retries = params.retries || 0;
 		this.isRetryable = params.isRetryable || retryNetworkErrors;
+		this.slowThreshold = params.slowThreshold || 200;
 		this.options = params.options;
 	}
 
@@ -151,8 +155,9 @@ export class HttpClient {
 				res.on('end', () => {
 					const contentLength = Buffer.byteLength(data, 'utf8');
 					const durations = timer.durations();
+					const logLevel = durations.wasSlow ? 'warn' : 'verbose';
 
-					this.logger.verbose('Outbound HTTP request complete', {
+					this.logger[logLevel]('Outbound HTTP request complete', {
 						requestId,
 						hostname: this.hostname,
 						port: this.port,
@@ -179,7 +184,7 @@ export class HttpClient {
 				? httpsRequest(options, onResponse)
 				: httpRequest(options, onResponse);
 
-			const timer = new HttpTimer(req, requestId);
+			const timer = new HttpTimer(req, params.slowThreshold || this.slowThreshold);
 
 			let aborted = false;
 

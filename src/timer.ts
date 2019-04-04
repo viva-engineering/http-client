@@ -12,6 +12,7 @@ export interface TimerResult {
 	tlsHandshake?: string;
 	timeToFirstByte?: string;
 	contentDownload?: string;
+	wasSlow?: boolean;
 }
 
 const nanosecondsPerMillisecond = 10e5;
@@ -29,7 +30,7 @@ export class HttpTimer {
 
 	constructor(
 		protected readonly req: ClientRequest,
-		protected readonly requestId: number
+		protected readonly slowThreshold: number
 	) {
 		this.enqueued = process.hrtime();
 
@@ -66,9 +67,10 @@ export class HttpTimer {
 
 	durations() : TimerResult {
 		const result: TimerResult = { };
+		const duration = diff(this.enqueued, this.completed);
 
 		if (this.enqueued && this.completed) {
-			result.duration = formatDuration(diff(this.enqueued, this.completed));
+			result.duration = formatDuration(duration);
 		}
 
 		if (this.enqueued && this.started) {
@@ -96,6 +98,10 @@ export class HttpTimer {
 		if (this.firstByteRecieved && this.completed) {
 			result.contentDownload = formatDuration(diff(this.firstByteRecieved, this.completed));
 		}
+
+		const millisecondDuration = (duration[0] * 1000) + (duration[1] / nanosecondsPerMillisecond);
+
+		result.wasSlow = millisecondDuration > this.slowThreshold;
 
 		return result;
 	}
