@@ -2,7 +2,7 @@
 import { Logger } from '@viva-eng/logger';
 import { request as httpRequest, IncomingMessage, RequestOptions } from 'http';
 import { request as httpsRequest } from 'https';
-import { HttpTimer } from './timer';
+import { HttpTimer, TimerResult } from './timer';
 import { configureDnsCache, DnsCacheParams } from './dns-cache';
 import { TimeoutAbort, NetworkError, IsRetryableCallback, retryNetworkErrors } from './retryable';
 
@@ -35,6 +35,10 @@ export interface HttpRequestOptions {
 	options?: any;
 }
 
+export interface Response extends IncomingMessage {
+	timing?: TimerResult
+}
+
 export class HttpClient {
 	public readonly hostname: string;
 	public readonly port: number;
@@ -64,7 +68,7 @@ export class HttpClient {
 		return `#<HttpClient host=${this.hostname} port=${this.port} ssl=${this.ssl}>`;
 	}
 
-	request(method: string, path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+	request(method: string, path: string, params: HttpRequestOptions) : Promise<Response> {
 		const requestId = nextRequestId++;
 
 		if (requestId >= Number.MAX_SAFE_INTEGER) {
@@ -98,7 +102,7 @@ export class HttpClient {
 				timeout: timeout
 			});
 
-			const retryIfPossible = (outcome: IncomingMessage | NetworkError | Symbol) => {
+			const retryIfPossible = (outcome: Response | NetworkError | Symbol) => {
 				const attempt = params.attempt || 0;
 				const retries = params.retries == null ? this.retries : params.retries;
 	
@@ -135,7 +139,7 @@ export class HttpClient {
 				reject(outcome);
 			};
 
-			const onResponse = (res: IncomingMessage) => {
+			const onResponse = (res: Response) => {
 				timer.onResponse(res);
 
 				let data = '';
@@ -158,6 +162,8 @@ export class HttpClient {
 						contentLength,
 						...durations
 					});
+
+					res.timing = durations;
 
 					if (res.statusCode >= 400) {
 						retryIfPossible(res);
@@ -206,23 +212,23 @@ export class HttpClient {
 		});
 	}
 
-	get(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+	get(path: string, params: HttpRequestOptions) : Promise<Response> {
 		return this.request('GET', path, params);
 	}
 
-	post(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+	post(path: string, params: HttpRequestOptions) : Promise<Response> {
 		return this.request('POST', path, params);
 	}
 
-	put(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+	put(path: string, params: HttpRequestOptions) : Promise<Response> {
 		return this.request('PUT', path, params);
 	}
 
-	patch(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+	patch(path: string, params: HttpRequestOptions) : Promise<Response> {
 		return this.request('PATCH', path, params);
 	}
 
-	delete(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+	delete(path: string, params: HttpRequestOptions) : Promise<Response> {
 		return this.request('DELETE', path, params);
 	}
 }

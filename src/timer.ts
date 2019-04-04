@@ -1,9 +1,10 @@
 
-import { ClientRequest, IncomingMessage } from 'http';
+import { ClientRequest } from 'http';
+import { Response } from './index';
 
 type Time = [number, number];
 
-interface TimerResult {
+export interface TimerResult {
 	duration?: string;
 	queued?: string;
 	dnsLookup?: string;
@@ -53,7 +54,7 @@ export class HttpTimer {
 		});
 	}
 
-	onResponse(res: IncomingMessage) {
+	onResponse(res: Response) {
 		res.once('readable', () => {
 			this.firstByteRecieved = process.hrtime();
 		});
