@@ -205,4 +205,24 @@ export class HttpClient {
 			req.end();
 		});
 	}
+
+	get(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+		return this.request('GET', path, params);
+	}
+
+	post(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+		return this.request('POST', path, params);
+	}
+
+	put(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+		return this.request('PUT', path, params);
+	}
+
+	patch(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+		return this.request('PATCH', path, params);
+	}
+
+	delete(path: string, params: HttpRequestOptions) : Promise<IncomingMessage> {
+		return this.request('DELETE', path, params);
+	}
 }
