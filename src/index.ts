@@ -38,7 +38,9 @@ export interface HttpRequestOptions {
 }
 
 export interface Response extends IncomingMessage {
-	timing?: TimerResult
+	body?: string;
+	timing?: TimerResult;
+	json?: any
 }
 
 export class HttpClient {
@@ -169,7 +171,18 @@ export class HttpClient {
 						...durations
 					});
 
+					res.body = data;
 					res.timing = durations;
+
+					if (res.headers['content-type'] === 'application/json') {
+						try {
+							res.json = JSON.parse(data);
+						}
+
+						catch (error) {
+							this.logger.warn('HTTP response content-type was application/json, but the payload was unparsable', { requestId });
+						}
+					}
 
 					if (res.statusCode >= 400) {
 						retryIfPossible(res);
