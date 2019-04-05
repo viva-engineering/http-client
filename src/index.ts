@@ -84,7 +84,8 @@ export class HttpClient {
 		const options: RequestOptions = {
 			hostname: this.hostname,
 			port: this.port,
-			method: method
+			method: method,
+			path: path
 		};
 
 		if (this.options) {
