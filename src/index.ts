@@ -11,10 +11,15 @@ export { TimeoutAbort, NetworkError, IsRetryableCallback, retryNetworkErrors } f
 
 let nextRequestId: number = 1;
 
+interface Headers {
+	[header: string]: string;
+}
+
 export interface HttpClientParams {
 	hostname: string;
 	port: number;
 	ssl: boolean;
+	headers?: Headers;
 	logger: Logger;
 	timeout?: number;
 	retries?: number;
@@ -25,9 +30,7 @@ export interface HttpClientParams {
 
 export interface HttpRequestOptions {
 	body?: string | Buffer;
-	headers?: {
-		[header: string]: string;
-	};
+	headers?: Headers;
 	timeout?: number;
 	retries?: number;
 	/** Internal property, used for managing retry attempts */
@@ -46,6 +49,7 @@ export interface Response extends IncomingMessage {
 export class HttpClient {
 	public readonly hostname: string;
 	public readonly port: number;
+	public readonly headers?: Headers;
 	public readonly ssl: boolean;
 	public readonly logger: Logger;
 	public readonly timeout: number;
@@ -62,6 +66,7 @@ export class HttpClient {
 		this.hostname = params.hostname;
 		this.port = params.port;
 		this.ssl = params.ssl;
+		this.headers = params.headers || { };
 		this.logger = params.logger;
 		this.timeout = params.timeout || 0;
 		this.retries = params.retries || 0;
@@ -87,7 +92,11 @@ export class HttpClient {
 			hostname: this.hostname,
 			port: this.port,
 			method: method,
-			path: path
+			path: path,
+			headers: {
+				...this.headers,
+				...(params.headers || { })
+			}
 		};
 
 		if (this.options) {
