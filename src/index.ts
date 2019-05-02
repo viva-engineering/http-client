@@ -101,7 +101,7 @@ export class HttpClient {
 		return this._makeRequest('DELETE', path, params);
 	}
 
-	protected _makeRequest(method: string, path: string, params: HttpRequestOptions, attempt: number = 0) : Promise<Response> {
+	protected _makeRequest(method: string, path: string, params: HttpRequestOptions, attempt: number = 1) : Promise<Response> {
 		const requestId = nextRequestId++;
 
 		if (requestId >= Number.MAX_SAFE_INTEGER) {
