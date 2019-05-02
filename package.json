@@ -11,7 +11,7 @@
     "url": "git+https://github.com/viva-engineering/http-client.git"
   },
   "keywords": [
-    "logger"
+    "http-client"
   ],
   "author": "James Brumond <james@jbrumond.me> (http://www.jbrumond.me)",
   "license": "ISC",

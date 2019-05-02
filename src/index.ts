@@ -33,8 +33,6 @@ export interface HttpRequestOptions {
 	headers?: Headers;
 	timeout?: number;
 	retries?: number;
-	/** Internal property, used for managing retry attempts */
-	attempt?: number;
 	isRetryable?: IsRetryableCallback;
 	slowThreshold?: number;
 	options?: any;
@@ -80,6 +78,30 @@ export class HttpClient {
 	}
 
 	request(method: string, path: string, params: HttpRequestOptions) : Promise<Response> {
+		return this._makeRequest(method, path, params);
+	}
+
+	get(path: string, params: HttpRequestOptions) : Promise<Response> {
+		return this._makeRequest('GET', path, params);
+	}
+
+	post(path: string, params: HttpRequestOptions) : Promise<Response> {
+		return this._makeRequest('POST', path, params);
+	}
+
+	put(path: string, params: HttpRequestOptions) : Promise<Response> {
+		return this._makeRequest('PUT', path, params);
+	}
+
+	patch(path: string, params: HttpRequestOptions) : Promise<Response> {
+		return this._makeRequest('PATCH', path, params);
+	}
+
+	delete(path: string, params: HttpRequestOptions) : Promise<Response> {
+		return this._makeRequest('DELETE', path, params);
+	}
+
+	protected _makeRequest(method: string, path: string, params: HttpRequestOptions, attempt: number = 0) : Promise<Response> {
 		const requestId = nextRequestId++;
 
 		if (requestId >= Number.MAX_SAFE_INTEGER) {
@@ -119,7 +141,6 @@ export class HttpClient {
 			});
 
 			const retryIfPossible = (outcome: Response | NetworkError | Symbol) => {
-				const attempt = params.attempt || 0;
 				const retries = params.retries == null ? this.retries : params.retries;
 	
 				if (retries) {
@@ -127,11 +148,10 @@ export class HttpClient {
 						const newParams = Object.assign({ }, params);
 
 						newParams.retries = retries - 1;
-						newParams.attempt = attempt + 1;
 
 						const backoff = (2 ** attempt) * 250;
 						const doRetry = () => {
-							this.request(method, path, newParams).then(resolve, reject);
+							this._makeRequest(method, path, newParams, attempt + 1).then(resolve, reject);
 						};
 
 						setTimeout(doRetry, backoff);
@@ -238,25 +258,5 @@ export class HttpClient {
 
 			req.end();
 		});
-	}
-
-	get(path: string, params: HttpRequestOptions) : Promise<Response> {
-		return this.request('GET', path, params);
-	}
-
-	post(path: string, params: HttpRequestOptions) : Promise<Response> {
-		return this.request('POST', path, params);
-	}
-
-	put(path: string, params: HttpRequestOptions) : Promise<Response> {
-		return this.request('PUT', path, params);
-	}
-
-	patch(path: string, params: HttpRequestOptions) : Promise<Response> {
-		return this.request('PATCH', path, params);
-	}
-
-	delete(path: string, params: HttpRequestOptions) : Promise<Response> {
-		return this.request('DELETE', path, params);
 	}
 }
