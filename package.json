@@ -21,9 +21,11 @@
   "homepage": "https://github.com/viva-engineering/http-client#readme",
   "devDependencies": {
     "@types/node": "^11.11.4",
-    "@viva-eng/logger": "^1.0.11",
-    "tslint": "^5.14.0",
-    "typescript": "^3.3.4000"
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
+    "@viva-eng/logger": "^2.0.0",
+    "eslint": "^6.1.0",
+    "typescript": "^3.7.0"
   },
   "dependencies": {
     "dnscache": "^1.0.1"

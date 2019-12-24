@@ -1,5 +1,5 @@
 
-import dnscache from 'dnscache';
+import { isNode } from '../environment';
 
 export interface DnsCacheParams {
 	enable: boolean;
@@ -10,6 +10,12 @@ export interface DnsCacheParams {
 let dnsCache;
 
 export const configureDnsCache = (params: DnsCacheParams) => {
+	if (! isNode) {
+		return;
+	}
+
+	const dnscache = require('dnscache');
+
 	dnscache(params);
 
 	if (params.enable) {
@@ -18,7 +24,7 @@ export const configureDnsCache = (params: DnsCacheParams) => {
 };
 
 export const invalidateCacheForDomain = (domain: string) => {
-	if (! dnsCache) {
+	if (! isNode || ! dnsCache) {
 		return;
 	}
 

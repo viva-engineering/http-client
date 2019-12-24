@@ -1,6 +1,5 @@
 
-import { ClientRequest } from 'http';
-import { Response } from './index';
+import { ClientRequest, IncomingMessage } from 'http';
 
 type Time = [number, number];
 
@@ -12,7 +11,6 @@ export interface TimerResult {
 	tlsHandshake?: string;
 	timeToFirstByte?: string;
 	contentDownload?: string;
-	wasSlow?: boolean;
 }
 
 const nanosecondsPerMillisecond = 10e5;
@@ -28,10 +26,7 @@ export class HttpTimer {
 	protected firstByteRecieved: Time;
 	protected completed: Time;
 
-	constructor(
-		protected readonly req: ClientRequest,
-		protected readonly slowThreshold: number
-	) {
+	constructor(protected readonly req: ClientRequest) {
 		this.enqueued = process.hrtime();
 
 		this.req.on('socket', (socket) => {
@@ -55,7 +50,7 @@ export class HttpTimer {
 		});
 	}
 
-	onResponse(res: Response) {
+	onResponse(res: IncomingMessage) {
 		res.once('readable', () => {
 			this.firstByteRecieved = process.hrtime();
 		});
@@ -100,8 +95,6 @@ export class HttpTimer {
 		}
 
 		const millisecondDuration = (duration[0] * 1000) + (duration[1] / nanosecondsPerMillisecond);
-
-		result.wasSlow = millisecondDuration > this.slowThreshold;
 
 		return result;
 	}
