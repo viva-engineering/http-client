@@ -7,6 +7,8 @@ import { Logger } from '@viva-eng/logger';
 import { Headers, HttpClientParams, HttpRequestOptions, HttpResponse } from './http-client';
 export { Headers, HttpClientParams, HttpRequestOptions, HttpResponse } from './http-client';
 
+export { HttpClient as HttpClientWrapper } from './shim';
+
 export let NodeHttpClient: typeof import('./node/client').NodeHttpClient;
 export let BrowserHttpClient: typeof import('./browser/client').BrowserHttpClient;
 

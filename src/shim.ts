@@ -8,7 +8,7 @@ import { HttpClient as BaseClient, HttpClientParams, HttpRequestOptions, HttpRes
 // to create a fake "shim" class that will never actually be used aside from borrowing its type
 // after we define it.
 // 
-class HttpClient extends BaseClient {
+export class HttpClient extends BaseClient {
 	protected makeRequest<T>(method: string, path: string, params: HttpRequestOptions) : Promise<HttpResponse<T>> {
 		return new Promise((resolve) => resolve());
 	}
