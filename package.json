@@ -1,6 +1,6 @@
 {
   "name": "@viva-eng/http-client",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A utility for interacting with HTTP APIs",
   "main": "build/index.js",
   "scripts": {
